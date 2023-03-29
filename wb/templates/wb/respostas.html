@@ -1,0 +1,163 @@
+{% extends 'wb/index.html' %}
+{% block content %}
+{% load mathfilters %}
+<style>
+/* Style the card container */
+.container {
+    display: flex;
+  flex-wrap: wrap;
+}
+a {
+    text-align: left;
+}
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  width: 100%;
+  font-family: arial;
+  transition: 0.3s;
+  background-color: rgba(255,255,255,0.7);
+}
+
+.image {
+  width: 100%;
+  height: 200px;
+  background-color: #555;
+  overflow: hidden;
+  position: relative;
+}
+
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.3s;
+}
+
+.content {
+  padding: 10px;
+}
+
+.title {
+  color: black;
+  font-size: 18px;
+  text-align: center;
+}
+
+.description {
+  color: black;
+  font-size: 14px;
+}
+
+</style>
+<h2> Resultados </h2>
+<h4> Cálculo dos indicadores </h4>
+<h5> De acordo com as informações inseridas: </h5>
+{% for questao in questoes %}
+    <h6> {{ questao.identificador }}:
+    {% for valor in lista %}
+        {% if questao.id == forloop.counter %}
+        {{ valor|floatformat }}%
+        {% endif %}
+    {% endfor %}
+    </h6>
+{% endfor %}
+<h6>Média dos indicadores: {{ media|floatformat }}% </h6>
+<h5>Recomendações</h5>
+<h6>OCE: {% if media >= 100 %}100%{% else %}{{ media|floatformat }}%{% endif %}</h6>
+{% if media >= 85 %}
+    <h6>Bom índice de circularidade, a empresa apresenta indicadores apropriados de adoção de circularidade</h6>
+{% else %}
+    <h6>Baixo índice de circularidade, a empresa precisa revisar indicadores abaixo de 100%</h6>
+{% endif %}
+{% load static %}
+<h4> Gráfico </h4>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<canvas id="myChart" width="400" height="400"></canvas>
+<div hidden>
+<div id="labels">{% for questao in questoes %}{{ questao.identificador }} {% endfor %}</div>
+<div id="data">{% for valor in lista %}{{valor|floatformat }} {% endfor %}</div>
+<div id="target">{% for valor in targets %}{{valor.valor|floatformat }} {% endfor %}</div>
+<div id="empresa">{{ empresa.empresa }}</div> 
+</div>
+<div id="ahm">
+    <h4> Boas práticas recomendadas </h4>
+{% for target in targets %}
+    {% for valor in lista %}
+        {% if target.questao.id == forloop.counter %}
+            {% if valor|floatformat  < target.valor|floatformat  %} 
+                <h6> Para o indicador {{ target.questao.identificador }} </h6>
+                {% for boapratica in boaspraticas %}
+                    {% if target.questao.id == boapratica.questao.id %}
+                        <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}">
+                        <div class="card">
+                          <div class="image">
+                            <img src="{{ boapratica.imagem.url }}">
+                          </div>
+                          <div class="content">
+                            <h3 class="title">{{ boapratica.titulo }}</h3>
+                            <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
+                          </div>
+                        </div>
+                        </a>
+                        <br>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+</div>
+
+<script>
+  var ctx = document.getElementById('myChart').getContext('2d');
+
+  var div = document.getElementById('labels');
+  var text = div.textContent;
+  var lista = text.split(' ');
+  var lista = lista.slice(0, -1);
+
+  var div = document.getElementById('data');
+  var text = div.textContent;
+  var data = text.split(' ');
+  var data = data.slice(0, -1);
+
+  var div = document.getElementById('target');
+  var text = div.textContent;
+  var target = text.split(' ');
+  var target = target.slice(0, -1);
+
+  var div = document.getElementById('empresa');
+  var empresa = div.textContent;
+
+  var myChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+          labels: lista,
+          datasets: [{
+              label: empresa,
+              data: data,
+              borderWidth: 1,
+              backgroundColor: [
+                "#bb2649"
+              ]
+          },{
+              label: 'Valor alvo',
+              data: target,
+              borderWidth: 1,
+              backgroundColor: [
+                "#f38b4a"
+              ]
+          }]
+      },
+      options: {
+          scales: {
+              r: {
+                      beginAtZero: true
+                  
+              }
+          }
+      }
+  });
+</script>
+
+{% endblock %}

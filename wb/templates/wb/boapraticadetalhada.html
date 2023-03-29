@@ -1,0 +1,48 @@
+{% extends 'wb/index.html' %} 
+{% block content %}
+<h2> Boa Pratica </h2> <!-- título de Boa Prática --> 
+<br><br>
+<style>
+.image {
+  width: 100%;
+  height: 200px;
+  background-color: #555;
+  overflow: hidden;
+  position: relative;
+}
+
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.3s;
+}
+
+.content {
+  padding: 10px;
+}
+
+.title {
+  color: black;
+  font-size: 18px;
+}
+
+.description {
+  color: black;
+  font-size: 14px;
+}
+
+</style>
+<div class="container">
+<div class="card">
+  <div class="image">
+    <img src="{{ boapratica.imagem.url }}">
+  </div>
+  <div class="content">
+    <h3 class="title">{{ boapratica.titulo }}</h3>
+    <p class="description">{{ boapratica.descricao }}</p>
+    <a href="{% url 'respostas' %}"><button>Voltar</button></a>
+  </div>
+</div>
+</div>
+{% endblock %}

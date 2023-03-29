@@ -1,0 +1,51 @@
+{% extends 'wb/index.html' %}
+{% block content %}
+                    <h2> Questionario </h2>
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% for form in formset %}
+        {% for field in form %}
+            <div hidden>
+            {% if 'Empresa:' in field.label_tag %} 
+                {{ field.label_tag }}
+                {{ field }}
+            {% endif %} 
+            {% if 'Questao:' in field.label_tag %} 
+                {{ field.label_tag }}
+                {{ field.errors }}
+                {{ field }}
+            {% endif %}   
+            </div>
+            {% if 'Questao:' in field.label_tag %} 
+                {% for questao in questoes %}
+                    {% if questao.id == field.value %}
+                        <h4> {{ questao.identificador }} - {{ questao.titulo_pergunta}} </h4>
+                        <h5> {{ questao.pergunta }} </h5>
+                    {% endif%}
+                {% endfor %}
+            {% endif %}   
+
+            {% if 'Resposta:' in field.label_tag %} 
+                {{ field.label_tag }}
+                {{ field.errors }}
+                {{ field }}
+            {% endif %}  
+
+        {% endfor%}
+
+        {% for field in form %}
+            {% for questao in questoes %}
+                {% if 'Questao:' in field.label_tag %} 
+                    {% if questao.id == field.value %}
+                        <h6> {{ questao.comentario }} </h6>
+                    {% endif%}
+                {% endif%}
+            {% endfor %}
+        {% endfor%}
+
+    {% endfor %}
+    <input type="submit" value="Salvar">
+</form>
+{% load static %}
+{% endblock %}

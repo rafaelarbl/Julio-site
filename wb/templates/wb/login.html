@@ -1,0 +1,11 @@
+{% extends 'wb/index.html' %}
+                    {% block content %}
+                    <h2> Entrar </h2>
+        <form  method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+<p><a href="{% url 'esqueceuasenha' %}">Esqueceu a senha?</a></p>
+    <input class="button-primary" type="submit" value="Entrar">
+  </fieldset>
+</form>
+{% load static %}
+                    {% endblock %}
