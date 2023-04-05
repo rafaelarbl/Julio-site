@@ -20,8 +20,10 @@
             {% if 'Questao:' in field.label_tag %} 
                 {% for questao in questoes %}
                     {% if questao.id == field.value %}
-                        <h4> {{ questao.identificador }} - {{ questao.titulo_pergunta}} </h4>
-                        <h5> {{ questao.pergunta }} </h5>
+                        {% if questao.tipo == "VM" %}
+                            <h4> {{ questao.identificador }} - {{ questao.titulo_pergunta}} </h4>
+                        {% endif %}
+                            <h5> {{ questao.pergunta }} </h5>
                     {% endif%}
                 {% endfor %}
             {% endif %}   

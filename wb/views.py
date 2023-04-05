@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from .forms import EmpresaForm, QuestionarioForm,RespostaForm, SignUpForm, LoginForm, PasswordResetForm
-from .models import Questionario, Empresa, Resposta, ValorReferencia,TargetGrafico, BoasPraticas
+from .models import Questionario, Empresa, Resposta, ValorReferencia, BoasPraticas
 from django.contrib import messages
 from django.forms import modelformset_factory
 from django.contrib.auth.models import User
@@ -81,7 +81,6 @@ def questionario(request):
 			messages.success(request, "Questionario salvo com sucesso.")
 			return redirect('respostas')
 		else:
-			print('AAAAAAAAAAA')
 			print(formset.errors)
 			messages.error(request, "Por favor preencha todas as informações antes de enviar.")
 			return redirect('questionario')
@@ -98,25 +97,66 @@ def respostas(request):
 	except TypeError:
 		empresa = None
 	respostas = Resposta.objects.filter(empresa=empresa)
-	targets = TargetGrafico.objects.all()
 	boaspraticas = BoasPraticas.objects.all()
 
 	lista = []
-	for resposta in respostas:
-		for valor in valorreferencia:
-			if resposta.questao == valor.questao:
-				if resposta.questao.id == 1 or resposta.questao.id == 2:
-					res = 100 - (100 * ((resposta.resposta - valor.valor ) / valor.valor ))
-					print (resposta.resposta)
-					print(valor.valor)
-				else:
-					res = resposta.resposta
-				lista.append(res)
-	media = 0
-	if len(lista) > 0:
-		media = sum(lista)/len(lista)
+	diction = {}
+	grafico_valores = []
+	grafico_referencias = []
+	grafico_metas = []
+	for index,resposta1 in enumerate(respostas):
+		lista=[]
+		for resposta2 in respostas:
+			if resposta1.questao != resposta2.questao and resposta1.questao.identificador == resposta2.questao.identificador: #questoes diferentes com o mesmo identificador
+				if resposta1.questao.tipo == 'VM' and resposta2.questao.tipo == 'VA': #resposta1 tem a meta e resposta2 tem o valor atingido
+					if resposta1.questao.identificador == "IW1" or resposta1.questao.identificador == "IE1":
+						valor_atingido = (1 - ((resposta2.resposta - resposta1.resposta) / resposta1.resposta)) * 100
+						meta_empresa = 100
+						lista.append(valor_atingido)
+						grafico_valores.append(valor_atingido)
+						grafico_metas.append(meta_empresa)
+					else:
+						meta_empresa = resposta1.resposta
+						valor_atingido = resposta2.resposta
+						lista.append(valor_atingido)
+						grafico_metas.append(meta_empresa)
+						grafico_valores.append(valor_atingido)
+					for vr in valorreferencia:
+						if vr.questao == resposta2.questao:
+							if vr.questao.identificador == "IW1" or vr.questao.identificador == "IE1":
+								referencia = (1 - ((resposta2.resposta - vr.valor) / vr.valor)) * 100
+								lista.append(referencia)
+								grafico_referencias.append(100)
+							else:
+								referencia = vr.valor * 100
+								lista.append(referencia)
+								grafico_referencias.append(referencia)
+					diction[resposta1.questao.identificador] = lista
 
-	return render(request, 'wb/respostas.html', {'empresa':empresa,'questoes':questoes,'lista':lista,'media':media,'targets':targets,'boaspraticas':boaspraticas})
+	oce_meta = []
+	oce_referencia = []
+	for key, value in diction.items():
+		a = value[0]
+		if value[0] > 100:
+			a = 100
+		if value[0] < 0:
+			a = 0
+		oce_meta.append(a)
+		a = value[1]
+		if value[1] > 100:
+			a = 100
+		if value[1] < 0:
+			a = 0
+		oce_referencia.append(a)
+	media_meta = 0
+	print(oce_meta)
+	if len(oce_meta) > 0:
+		media_meta = sum(oce_meta)/len(oce_meta)
+	media_referencia = 0
+	print(oce_referencia)
+	if len(oce_referencia) > 0:
+		media_referencia = sum(oce_referencia)/len(oce_referencia)
+	return render(request, 'wb/respostas.html', {'valorreferencia':valorreferencia,'grafico_metas':grafico_metas,'grafico_valores':grafico_valores,'grafico_referencias':grafico_referencias,'diction':diction,'empresa':empresa,'questoes':questoes,'lista':lista,'oce_meta':media_meta,'oce_referencia':media_referencia,'boaspraticas':boaspraticas})
 
 
 def cadastrar(request):

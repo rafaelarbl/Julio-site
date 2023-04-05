@@ -7,9 +7,6 @@
     display: flex;
   flex-wrap: wrap;
 }
-a {
-    text-align: left;
-}
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   width: 100%;
@@ -48,85 +45,179 @@ a {
   font-size: 14px;
 }
 
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #bb2649;
+    border-radius: 25px;
+    -moz-border-radius: 25px;
+    padding: 25px;
+}
+td, th{
+    text-align: center;
+}
+
 </style>
 <h2> Resultados </h2>
 <h4> Cálculo dos indicadores </h4>
 <h5> De acordo com as informações inseridas: </h5>
-{% for questao in questoes %}
-    <h6> {{ questao.identificador }}:
-    {% for valor in lista %}
-        {% if questao.id == forloop.counter %}
-        {{ valor|floatformat }}%
-        {% endif %}
+
+<table style="width:100%">
+  <tr>
+    <th>Indicador</th>
+    <th>Em Relação a Meta Empresa</th>
+    <th>Em Relação ao Valor Referência</th>
+  </tr>
+  
+  {% for key,value in diction.items %}
+  <tr>
+    <td>{{ key }}</td>
+    {% for item in value %}
+    <td>{{ item|floatformat:2 }}%</td>
     {% endfor %}
-    </h6>
-{% endfor %}
-<h6>Média dos indicadores: {{ media|floatformat }}% </h6>
+  </tr>
+  {% if key == "IE1" %}
+  <tr>
+    <th>Indicador</th>
+    <th>Valor Alcançado da Empresa</th>
+    <th>Valor Alcançado pela Empresa Referência</th>
+  </tr>
+  {% endif %}
+  {% endfor %}
+  
+  <tr>
+    <th>OCE</th>
+    <th>{{ oce_meta|floatformat }}%</th>
+    <th>{{ oce_referencia|floatformat }}%</th>
+  </tr>
+
+  </table>
+
+
 <h5>Recomendações</h5>
-<h6>OCE: {% if media >= 100 %}100%{% else %}{{ media|floatformat }}%{% endif %}</h6>
-{% if media >= 85 %}
+
+<!-- descobrir se ainda vai ter essa frase de recomendações, e se ela vai considerar o OCE em relação a meta da empresa ou em relação a empresa de referencia -->
+
+{% if oce_meta >= 85 %}
     <h6>Bom índice de circularidade, a empresa apresenta indicadores apropriados de adoção de circularidade</h6>
 {% else %}
     <h6>Baixo índice de circularidade, a empresa precisa revisar indicadores abaixo de 100%</h6>
 {% endif %}
 {% load static %}
+
+
+
+<!-- recalcular valores do grafico, descobrir método de cálculo, refazer por que os valores não estão dinâmicos -->
+<style>
+.yay:hover {
+  background-color: #bb2649 !important;
+  border: 0.1rem solid #bb2649 !important;
+}
+</style>
+<script>
+  function meta() {
+    const meta = document.getElementById('myChart1');
+    const referencia = document.getElementById('myChart2');
+    const btnmeta = document.getElementById('btnmeta');
+    const btnreferencia = document.getElementById('btnreferencia');
+    referencia.style.display = 'none';
+    meta.style.display = 'block';
+
+    btnmeta.style.backgroundColor = '#bb2649';
+    btnmeta.style.borderColor = '#bb2649';
+    btnreferencia.style.backgroundColor = '#606c76';
+    btnreferencia.style.borderColor = '#606c76';
+  }
+  function referencia() {
+    const meta = document.getElementById('myChart1');
+    const referencia = document.getElementById('myChart2');
+    const btnmeta = document.getElementById('btnmeta');
+    const btnreferencia = document.getElementById('btnreferencia');
+    meta.style.display = 'none';
+    referencia.style.display = 'block';
+
+    btnmeta.style.backgroundColor = '#606c76';
+    btnmeta.style.borderColor = '#606c76';
+    btnreferencia.style.backgroundColor = '#bb2649';
+    btnreferencia.style.borderColor = '#bb2649';
+  }
+</script>
 <h4> Gráfico </h4>
+    <button id="btnmeta" onclick="meta()" class="yay" style="max-width: 49%;word-break: normal;white-space: normal;word-wrap: break-word;height:100%;line-height: 1.5;padding: 5%;">Clique para ver o gráfico da empresa em relação à meta</button>
+    <button id="btnreferencia" onclick="referencia()" class="yay" style="max-width: 49%;word-break: normal;white-space: normal;word-wrap: break-word;height:100%;line-height: 1.5;padding: 5%;background-color:#606c76; border: 0.1rem solid #606c76;">Clique para ver o gráfico da empresa em relação à referência</button>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<canvas id="myChart" width="400" height="400"></canvas>
+<canvas id="myChart1" width="400" height="400"></canvas>
 <div hidden>
-<div id="labels">{% for questao in questoes %}{{ questao.identificador }} {% endfor %}</div>
-<div id="data">{% for valor in lista %}{{valor|floatformat }} {% endfor %}</div>
-<div id="target">{% for valor in targets %}{{valor.valor|floatformat }} {% endfor %}</div>
-<div id="empresa">{{ empresa.empresa }}</div> 
+<div id="labels1">{% for key,value in diction.items %}{{ key }} {% endfor %}</div>
+<div id="data1">{% for valor in grafico_valores %}{{valor|floatformat}} {% endfor %}</div>
+<div id="empresa1">{{ empresa.empresa }}</div> 
+<div id="target1">{% for valor in grafico_metas %}{{valor|floatformat}} {% endfor %}</div>
 </div>
+<canvas id="myChart2" width="400" height="400" style="display:none"></canvas>
+<div hidden>
+<div id="labels2">{% for key,value in diction.items %}{{ key }} {% endfor %}</div>
+<div id="data2">{% for valor in grafico_valores %}{{valor|floatformat}} {% endfor %}</div>
+<div id="target2">{% for valor in grafico_referencias %}{{valor|floatformat}} {% endfor %}</div>
+<div id="empresa2">{{ empresa.empresa }}</div> 
+</div>
+
+<!-- descobrir se as boas práticas recomendadas vai considerar o OCE em relação a meta da empresa ou em relação a empresa de referencia -->
 <div id="ahm">
     <h4> Boas práticas recomendadas </h4>
-{% for target in targets %}
-    {% for valor in lista %}
-        {% if target.questao.id == forloop.counter %}
-            {% if valor|floatformat  < target.valor|floatformat  %} 
-                <h6> Para o indicador {{ target.questao.identificador }} </h6>
-                {% for boapratica in boaspraticas %}
-                    {% if target.questao.id == boapratica.questao.id %}
-                        <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}">
-                        <div class="card">
-                          <div class="image">
-                            <img src="{{ boapratica.imagem.url }}">
+      {% for referencia in valorreferencia %}
+          {% for key,value in diction.items %}
+            {% for valor in value %}
+              {% if forloop.counter == 2 %}
+                {% if key == referencia.questao.identificador %}
+                  {% if valor < referencia.valor and referencia.questao.tipo == "VM" %}
+
+                    <h4> Para o indicador {{ referencia.questao.identificador }} </h4>
+
+
+                    {% for boapratica in boaspraticas %}
+                        {% if boapratica.questao.identificador == referencia.questao.identificador and boapratica.questao.tipo == referencia.questao.tipo %}
+                          <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}" style="text-align: left;">
+                          <div class="card">
+                            <div class="image">
+                              <img src="{{ boapratica.imagem.url }}">
+                            </div>
+                            <div class="content">
+                              <h3 class="title">{{ boapratica.titulo }}</h3>
+                              <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
+                            </div>
                           </div>
-                          <div class="content">
-                            <h3 class="title">{{ boapratica.titulo }}</h3>
-                            <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
-                          </div>
-                        </div>
-                        </a>
-                        <br>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-{% endfor %}
+                          </a>
+                          <br>
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+      {% endfor %}
 </div>
 
 <script>
-  var ctx = document.getElementById('myChart').getContext('2d');
+  // primeiro gráfico
+  var ctx = document.getElementById('myChart1').getContext('2d');
 
-  var div = document.getElementById('labels');
+  var div = document.getElementById('labels1');
   var text = div.textContent;
   var lista = text.split(' ');
   var lista = lista.slice(0, -1);
 
-  var div = document.getElementById('data');
+  var div = document.getElementById('data1');
   var text = div.textContent;
   var data = text.split(' ');
   var data = data.slice(0, -1);
 
-  var div = document.getElementById('target');
+  var div = document.getElementById('target1');
   var text = div.textContent;
   var target = text.split(' ');
   var target = target.slice(0, -1);
 
-  var div = document.getElementById('empresa');
+  var div = document.getElementById('empresa1');
   var empresa = div.textContent;
 
   var myChart = new Chart(ctx, {
@@ -134,18 +225,81 @@ a {
       data: {
           labels: lista,
           datasets: [{
-              label: empresa,
-              data: data,
-              borderWidth: 1,
+              label: 'Valor meta',
+              data: target,
+              borderWidth: 3,
+              borderColor: [
+                "#f38b4a"
+              ],
               backgroundColor: [
-                "#bb2649"
+                'rgba(243, 139, 74,0.05)'
               ]
           },{
-              label: 'Valor alvo',
-              data: target,
-              borderWidth: 1,
+              label: 'Valor empresa ' + empresa,
+              data: data,
+              borderWidth: 3,
+              borderColor: [
+                "#bb2649"
+              ],
               backgroundColor: [
+                'rgba(187, 38, 73,0.05)'
+              ]
+          }]
+      },
+      options: {
+          scales: {
+              r: {
+                      beginAtZero: true
+                  
+              }
+          }
+      }
+  });
+
+  // segundo gráfico
+  var ctx = document.getElementById('myChart2').getContext('2d');
+
+  var div = document.getElementById('labels2');
+  var text = div.textContent;
+  var lista = text.split(' ');
+  var lista = lista.slice(0, -1);
+
+  var div = document.getElementById('data2');
+  var text = div.textContent;
+  var data = text.split(' ');
+  var data = data.slice(0, -1);
+
+  var div = document.getElementById('target2');
+  var text = div.textContent;
+  var target = text.split(' ');
+  var target = target.slice(0, -1);
+
+  var div = document.getElementById('empresa2');
+  var empresa = div.textContent;
+
+  var myChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+          labels: lista,
+          datasets: [{
+              label: 'Valor Referência',
+              data: target,
+              borderWidth: 3,
+              borderColor: [
                 "#f38b4a"
+              ],
+              backgroundColor: [
+                'rgba(243, 139, 74,0.05)'
+              ]
+          },{
+              label: 'Valor empresa ' + empresa,
+              data: data,
+              borderWidth: 3,
+              borderColor: [
+                "#bb2649"
+              ],
+              backgroundColor: [
+                'rgba(187, 38, 73,0.05)'
               ]
           }]
       },

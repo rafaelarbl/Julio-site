@@ -1,10 +1,13 @@
 {% extends 'wb/index.html' %}
-                    {% block content %}
-                    <h2> Cadastrar empresa </h2>
-        <form  method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
-    <input class="button-primary" type="submit" value="Salvar">
-  </fieldset>
-</form>
+
+{% block content %}
+  <div id='Certeza'>
+    <h2> Cadastrar empresa </h2>
+    <form method="POST" class="post-form">{% csrf_token %}
+      {{ form.as_p }}
+      <input class="button-primary" type="submit" value="Salvar">
+    </form>
+  </div>
 {% load static %}
-                    {% endblock %}
+
+{% endblock %}
