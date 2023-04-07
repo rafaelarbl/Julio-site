@@ -86,7 +86,7 @@ td, th{
   {% endfor %}
   
   <tr>
-    <th>OCE</th>
+    <th>Índice OCE</th>
     <th>{{ oce_meta|floatformat }}%</th>
     <th>{{ oce_referencia|floatformat }}%</th>
   </tr>
@@ -156,7 +156,7 @@ td, th{
 <canvas id="myChart2" width="400" height="400" style="display:none"></canvas>
 <div hidden>
 <div id="labels2">{% for key,value in diction.items %}{{ key }} {% endfor %}</div>
-<div id="data2">{% for valor in grafico_valores %}{{valor|floatformat}} {% endfor %}</div>
+<div id="data2">{% for valor in grafico_valores2 %}{{valor|floatformat}} {% endfor %}</div>
 <div id="target2">{% for valor in grafico_referencias %}{{valor|floatformat}} {% endfor %}</div>
 <div id="empresa2">{{ empresa.empresa }}</div> 
 </div>
@@ -167,29 +167,60 @@ td, th{
       {% for referencia in valorreferencia %}
           {% for key,value in diction.items %}
             {% for valor in value %}
-              {% if forloop.counter == 2 %}
-                {% if key == referencia.questao.identificador %}
-                  {% if valor < referencia.valor and referencia.questao.tipo == "VM" %}
+              {% if key == 'IW1' or key == 'IE1' %}
+                {% if forloop.counter == 2 %}
+                  {% if key == referencia.questao.identificador %}
+                    {% if valor < referencia.valor and referencia.questao.tipo == "VM" %}
 
-                    <h4> Para o indicador {{ referencia.questao.identificador }} </h4>
+                      <h4> Para o indicador {{ referencia.questao.identificador }} </h4>
 
 
-                    {% for boapratica in boaspraticas %}
-                        {% if boapratica.questao.identificador == referencia.questao.identificador and boapratica.questao.tipo == referencia.questao.tipo %}
-                          <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}" style="text-align: left;">
-                          <div class="card">
-                            <div class="image">
-                              <img src="{{ boapratica.imagem.url }}">
+                      {% for boapratica in boaspraticas %}
+                          {% if boapratica.questao.identificador == referencia.questao.identificador and boapratica.questao.tipo == referencia.questao.tipo %}
+                            <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}" style="text-align: left;">
+                            <div class="card">
+                              <div class="image">
+                                <img src="{{ boapratica.imagem.url }}">
+                              </div>
+                              <div class="content">
+                                <h3 class="title">{{ boapratica.titulo }}</h3>
+                                <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
+                              </div>
                             </div>
-                            <div class="content">
-                              <h3 class="title">{{ boapratica.titulo }}</h3>
-                              <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
+                            </a>
+                            <br>
+                          {% endif %}
+                      {% endfor %}
+
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
+              {% else %}
+                {% if forloop.counter == 1 %}
+                  {% if key == referencia.questao.identificador %}
+                    {% if valor < referencia.valor and referencia.questao.tipo == "VM" %}
+
+                      <h4> Para o indicador {{ referencia.questao.identificador }} </h4>
+
+
+                      {% for boapratica in boaspraticas %}
+                          {% if boapratica.questao.identificador == referencia.questao.identificador and boapratica.questao.tipo == referencia.questao.tipo %}
+                            <a href="{% url 'boaspraticasdetalhada' boapratica.pk %}" style="text-align: left;">
+                            <div class="card">
+                              <div class="image">
+                                <img src="{{ boapratica.imagem.url }}">
+                              </div>
+                              <div class="content">
+                                <h3 class="title">{{ boapratica.titulo }}</h3>
+                                <p class="description">{{ boapratica.descricao|truncatechars:170 }}</p>
+                              </div>
                             </div>
-                          </div>
-                          </a>
-                          <br>
-                        {% endif %}
-                    {% endfor %}
+                            </a>
+                            <br>
+                          {% endif %}
+                      {% endfor %}
+
+                    {% endif %}
                   {% endif %}
                 {% endif %}
               {% endif %}
@@ -235,7 +266,7 @@ td, th{
                 'rgba(243, 139, 74,0.05)'
               ]
           },{
-              label: 'Valor empresa ' + empresa,
+              label: 'Resultado Alcançado Empresa Comparado a Meta',
               data: data,
               borderWidth: 3,
               borderColor: [
@@ -292,7 +323,7 @@ td, th{
                 'rgba(243, 139, 74,0.05)'
               ]
           },{
-              label: 'Valor empresa ' + empresa,
+              label: 'Resultado Alcançado Empresa Comparado a uma Referência',
               data: data,
               borderWidth: 3,
               borderColor: [

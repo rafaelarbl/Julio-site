@@ -104,6 +104,7 @@ def respostas(request):
 	grafico_valores = []
 	grafico_referencias = []
 	grafico_metas = []
+	grafico_valores2 = []
 	for index,resposta1 in enumerate(respostas):
 		lista=[]
 		for resposta2 in respostas:
@@ -127,27 +128,46 @@ def respostas(request):
 								referencia = (1 - ((resposta2.resposta - vr.valor) / vr.valor)) * 100
 								lista.append(referencia)
 								grafico_referencias.append(100)
+								grafico_valores2.append(referencia)
 							else:
 								referencia = vr.valor * 100
 								lista.append(referencia)
 								grafico_referencias.append(referencia)
+								grafico_valores2.append(resposta2.resposta)
 					diction[resposta1.questao.identificador] = lista
 
 	oce_meta = []
 	oce_referencia = []
 	for key, value in diction.items():
-		a = value[0]
-		if value[0] > 100:
-			a = 100
-		if value[0] < 0:
-			a = 0
-		oce_meta.append(a)
-		a = value[1]
-		if value[1] > 100:
-			a = 100
-		if value[1] < 0:
-			a = 0
-		oce_referencia.append(a)
+		if key == 'IW1' or key == 'IE1':
+			a = value[0]
+			if value[0] > 100:
+				a = 100
+			if value[0] < 0:
+				a = 0
+			oce_meta.append(a)
+
+			a = value[1]
+			if value[1] > 100:
+				a = 100
+			if value[1] < 0:
+				a = 0
+			oce_referencia.append(a)
+		else:
+			a = value[0]
+			if value[0] > 100:
+				a = 100
+			if value[0] < 0:
+				a = 0
+			oce_meta.append(a)
+
+			a = value[0]
+			if value[0] > 100:
+				a = 100
+			if value[0] < 0:
+				a = 0
+			oce_referencia.append(a)
+
 	media_meta = 0
 	print(oce_meta)
 	if len(oce_meta) > 0:
@@ -156,7 +176,7 @@ def respostas(request):
 	print(oce_referencia)
 	if len(oce_referencia) > 0:
 		media_referencia = sum(oce_referencia)/len(oce_referencia)
-	return render(request, 'wb/respostas.html', {'valorreferencia':valorreferencia,'grafico_metas':grafico_metas,'grafico_valores':grafico_valores,'grafico_referencias':grafico_referencias,'diction':diction,'empresa':empresa,'questoes':questoes,'lista':lista,'oce_meta':media_meta,'oce_referencia':media_referencia,'boaspraticas':boaspraticas})
+	return render(request, 'wb/respostas.html', {'grafico_valores2':grafico_valores2, 'valorreferencia':valorreferencia,'grafico_metas':grafico_metas,'grafico_valores':grafico_valores,'grafico_referencias':grafico_referencias,'diction':diction,'empresa':empresa,'questoes':questoes,'lista':lista,'oce_meta':media_meta,'oce_referencia':media_referencia,'boaspraticas':boaspraticas})
 
 
 def cadastrar(request):
